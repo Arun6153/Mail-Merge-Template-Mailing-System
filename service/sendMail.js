@@ -1,43 +1,50 @@
 const AWS = require("aws-sdk");
 const config = require('../env/enviornment_variables');
+const fs = require('fs');
+const path = require('path')
 
-exports.MailMerge_AWS_SES = function (req, res, next) {
+//FETCHING TEMPLATE ONE
+const htmlData = fs.readFileSync(__dirname +config.templatePath+'template_1.html', "UTF-8");
+
+exports.MailMerge_AWS_SES = (req, res, next)=> {
 
     console.log(req.body);
     console.log(req.body.email)
 
     AWS.config.update({
-        accessKeyId: config.aws_SES_Credentials.accessKeyId,
-        secretAccessKey: config.aws_SES_Credentials.secretAccessKey,
+        //accessKeyId: config.aws_SES_Credentials.accessKeyId,
+        //secretAccessKey: config.aws_SES_Credentials.secretAccessKey,
         region: config.aws_SES_Credentials.region
     });
 
     const ses = new AWS.SES({
         apiVersion: "2010-12-01"
     });
+
     const params = {
         Destination: {
-            receiverAddresses: [req.body.email] // Email address/addresses that you want to send your email
+          CcAddresses: [],
+          ToAddresses: [req.body.email]
         },
         Message: {
-            Body: {
-                Html: {
-                    // HTML Format of the email
-                    Charset: "UTF-8",
-                    Data: "<html><body><h1>Dear participants,</h1><p style='color:red'>Thank you for reaching out</p></body></html>"
-                },
-                Text: {
-                    Charset: "UTF-8",
-                    Data: "Welcome"
-                }
+          Body: {
+            Html: {
+             Charset: "UTF-8",
+             Data: htmlData
             },
-            Subject: {
-                Charset: "UTF-8",
-                Data: "Welcome."
+            Text: {
+             Charset: "UTF-8",
+             Data: "Welcome"
             }
-        },
-        Source: "Creslin Care" + config.aws_SES_Credentials.SenderEmailId
-    };
+           },
+           Subject: {
+            Charset: 'UTF-8',
+            Data: 'Testing'
+           }
+          },
+        Source: config.aws_SES_Credentials.SenderEmailId,
+        ReplyToAddresses: [],
+      };
 
     //For Sender
     const params1 = {
@@ -48,7 +55,7 @@ exports.MailMerge_AWS_SES = function (req, res, next) {
             Body: {
                 Html: {
                     Charset: "UTF-8",
-                    Data: "<html><h2>Report from Codez Tech</h2><h3>Name: " + req.body.name + "</h3><h3>Email: " + req.body.email + "</h3><h3>Message: " + req.body.message + "</h3></html>"
+                    Data: "<html><h2>Creslin Care</h2><h3>Name: " + "Arun Saini" + "</h3><h3>Email: " + req.body.email + "</h3><h3>Message: " + "No Message for now" + "</h3></html>"
                 },
                 Text: {
                     Charset: "UTF-8",
@@ -57,37 +64,21 @@ exports.MailMerge_AWS_SES = function (req, res, next) {
             },
             Subject: {
                 Charset: "UTF-8",
-                Data: "Feedback from " + req.body.name
+                Data: "Feedback from " + "Arun Saini"
             }
         },
         Source: "Feedback from user" + config.aws_SES_Credentials.SenderEmailId
     };
 
     //RECEIVER SEGMENT
-    const sendEmailReceiver = ses.sendEmail(params).promise();
-    const sendEmailSender = ses.sendEmail(params1).promise();
+    const sendEmail = ses.sendEmail(params).promise();
+    //const sendEmailSender = ses.sendEmail(params1).promise();
 
-    sendEmailReceiver
-        .then(data => {
-            console.log("email submitted to SES", data);
-            sendEmailSender.then(data => {
-                console.log("email submitted to SES", data);
-                res.status(200).send({
-                    message: 'Message send successfully !'
-                })
-            }).catch(error => {
-                console.log(error);
-                res.status(404).send({
-                    message: 'Failed to send !'
-                })
-            });
-        })
-        .catch(error => {
-            console.log(error);
-            res.status(404).send({
-                message: 'Failed to send !'
-            })
-        });
-
-
+    sendEmail.then(
+        function(data) {
+          console.log(data.MessageId);
+        }).catch(
+          function(err) {
+          console.error(err, err.stack);
+    });
 }

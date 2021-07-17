@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 })
 
 //POST: SEND EMAIL(s) TO PARAM DATA
-app.post('/users/sendmail', (req, res) => {
+app.get('/users/sendmail', (req, res) => {
     send.MailMerge_AWS_SES(req, res);
 });
 
