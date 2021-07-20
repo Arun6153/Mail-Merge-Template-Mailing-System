@@ -3,7 +3,7 @@ module.exports =
     port : 3000,
     aws_SES_Credentials : {
         region:"ap-south-1",
-        SenderEmailId:"sarun6153@gmail.com"
+        SenderEmailId:"asaini.cse17@chitkarauniversity.edu.in"
     },
-    templatePath:"/../view/templates/"
+    templatePath:"/../../view/templates/"
 }

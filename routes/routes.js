@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-const send = require('../service/sendMail');
+const sendMail = require('../service/sendMail');
 
 //BASE PATH 
 app.get('/', (req, res) => {
@@ -20,7 +20,10 @@ app.get('/', (req, res) => {
 
 //POST: SEND EMAIL(s) TO PARAM DATA
 app.get('/users/sendmail', (req, res) => {
-    send.MailMerge_AWS_SES(req, res);
+    sendMail.MailMerge_AWS_SES(req, res)
+    .then(data=>{
+        res.send(data);
+    })
 });
 
 module.exports = app;
